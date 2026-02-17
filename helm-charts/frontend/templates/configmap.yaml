@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-html
+  namespace: {{ .Release.Namespace }}
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Todo Application</title>
+        <style>
+            * { box-sizing: border-box; }
+            body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; margin: 0; }
+            .container { max-width: 600px; margin: 50px auto; background: white; border-radius: 15px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 15px 15px 0 0; }
+            .input-section { padding: 20px; display: flex; gap: 10px; }
+            #todoInput { flex: 1; padding: 15px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 16px; }
+            #addBtn { padding: 15px 30px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; }
+            .todo-list { padding: 20px; }
+            .todo-item { display: flex; padding: 15px; margin: 10px 0; background: #f8f9fa; border-radius: 8px; }
+            .todo-text { flex: 1; }
+            .delete-btn { padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header"><h1>Todo Application</h1></div>
+            <div class="input-section">
+                <input type="text" id="todoInput" placeholder="Add task..." />
+                <button id="addBtn">Add</button>
+            </div>
+            <div class="todo-list" id="todoList"></div>
+        </div>
+        <script>
+            const API = '/api';
+            async function loadTasks() {
+                try {
+                    const res = await fetch(API);
+                    const tasks = await res.json();
+                    document.getElementById('todoList').innerHTML = tasks.map(t => `<div class="todo-item"><span class="todo-text">${t.title}</span><button class="delete-btn" onclick="deleteTask(${t.id})">Delete</button></div>`).join('');
+                } catch(e) { console.error(e); }
+            }
+            async function addTask() {
+                const input = document.getElementById('todoInput');
+                if(!input.value.trim()) return;
+                try {
+                    await fetch(API, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({task: input.value}) });
+                    input.value = '';
+                    loadTasks();
+                } catch(e) { alert('Error'); }
+            }
+            async function deleteTask(id) {
+                try {
+                    await fetch(API + '/' + id, {method: 'DELETE'});
+                    loadTasks();
+                } catch(e) { alert('Error'); }
+            }
+            document.getElementById('addBtn').onclick = addTask;
+            loadTasks();
+            setInterval(loadTasks, 5000);
+        </script>
+    </body>
+    </html>
