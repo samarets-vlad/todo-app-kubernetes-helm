@@ -1,6 +1,6 @@
 image:
   repository: mysql
-  tag: "8.0.40-debian"  # Додати debian
+  tag: "8.0.40-debian"
   pullPolicy: IfNotPresent
 
 auth:
