@@ -16,6 +16,18 @@ spec:
       labels:
         app: {{ .Chart.Name }}
     spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - {{ .Chart.Name }}
+              topologyKey: kubernetes.io/hostname
       containers:
       - name: mysql
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
