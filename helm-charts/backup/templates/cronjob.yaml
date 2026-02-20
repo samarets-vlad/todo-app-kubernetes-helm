@@ -18,20 +18,13 @@ spec:
             - /bin/sh
             - -c
             - |
-              mysqldump -h {{ .Values.mysql.host }} -u root -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE > /backup/backup-$(date +\%Y\%m\%d-\%H\%M\%S).sql
+              mysqldump -h {{ .Values.mysql.host }} -u root -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE \
+                > /backup/backup-$(date +\%Y\%m\%d-\%H\%M\%S).sql
               echo "Backup completed"
               find /backup -name "backup-*.sql" -mtime +{{ .Values.retentionDays }} -delete
-            env:
-            - name: MYSQL_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.mysql.secretName }}
-                  key: {{ .Values.mysql.passwordKey }}
-            - name: MYSQL_DATABASE
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.mysql.secretName }}
-                  key: {{ .Values.mysql.databaseKey }}
+            envFrom:
+            - secretRef:
+                name: {{ .Values.mysql.secretName }}
             volumeMounts:
             - name: backup-storage
               mountPath: /backup

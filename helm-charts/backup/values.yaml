@@ -2,13 +2,11 @@ schedule: "0 2 * * *"
 
 image:
   repository: mysql
-  tag: "8.0"
+  tag: "8.0.40"
 
 mysql:
   host: "mysql"
   secretName: "mysql-secret"
-  passwordKey: "mysql-root-password"
-  databaseKey: "mysql-database"
 
 persistence:
   size: 2Gi
