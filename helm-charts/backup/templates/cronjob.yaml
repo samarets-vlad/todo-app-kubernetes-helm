@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mysql-backup
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "backup.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.schedule | quote }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: mysql-backup
+            image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+            command:
+            - /bin/sh
+            - -c
+            - |
+              mysqldump -h {{ .Values.mysql.host }} -u root -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE \
+                > /backup/backup-$(date +\%Y\%m\%d-\%H\%M\%S).sql
+              echo "Backup completed"
+              find /backup -name "backup-*.sql" -mtime +{{ .Values.retentionDays }} -delete
+            envFrom:
+            - secretRef:
+                name: {{ .Values.mysql.secretName }}
+            volumeMounts:
+            - name: backup-storage
+              mountPath: /backup
+          restartPolicy: OnFailure
+          volumes:
+          - name: backup-storage
+            persistentVolumeClaim:
+              claimName: backup-pvc

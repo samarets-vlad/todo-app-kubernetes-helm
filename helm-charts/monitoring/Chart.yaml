@@ -1,0 +1,6 @@
+apiVersion: v2
+name: monitoring
+description: Monitoring stack - Prometheus, Grafana, Loki, Promtail, Node Exporter, Blackbox Exporter
+type: application
+version: 1.0.0
+appVersion: "1.0"

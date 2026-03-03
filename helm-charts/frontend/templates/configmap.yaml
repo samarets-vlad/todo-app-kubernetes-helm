@@ -1,0 +1,78 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "frontend.fullname" . }}-html
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "frontend.labels" . | nindent 4 }}
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Todo App</title>
+      <style>
+        * { box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; margin: 0; }
+        .container { max-width: 600px; margin: 50px auto; background: white; border-radius: 15px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 15px 15px 0 0; }
+        .input-section { padding: 20px; display: flex; gap: 10px; }
+        #todoInput { flex: 1; padding: 15px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 16px; }
+        #addBtn { padding: 15px 30px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; }
+        .todo-list { padding: 20px; }
+        .todo-item { display: flex; padding: 15px; margin: 10px 0; background: #f8f9fa; border-radius: 8px; align-items: center; }
+        .todo-text { flex: 1; }
+        .delete-btn { padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header"><h1>Todo Application</h1></div>
+        <div class="input-section">
+          <input type="text" id="todoInput" placeholder="Add task..." autofocus>
+          <button id="addBtn">Add</button>
+        </div>
+        <div class="todo-list" id="todoList"></div>
+      </div>
+      <script>
+        const API = '/api';
+        async function loadTasks() {
+          try {
+            const res = await fetch(API);
+            const tasks = await res.json();
+            renderTasks(tasks);
+          } catch(e) {
+            document.getElementById('todoList').innerHTML = '<p style="color:red">Error loading tasks</p>';
+          }
+        }
+        function renderTasks(tasks) {
+          const html = tasks.length ? tasks.map(t =>
+            `<div class="todo-item"><span class="todo-text">${t.title}</span><button class="delete-btn" onclick="deleteTask(${t.id})">Delete</button></div>`
+          ).join('') : '<p style="text-align:center;color:#999">No tasks yet</p>';
+          document.getElementById('todoList').innerHTML = html;
+        }
+        async function addTask() {
+          const input = document.getElementById('todoInput');
+          const title = input.value.trim();
+          if (!title) return;
+          try {
+            await fetch(API, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({task: title}) });
+            input.value = '';
+            loadTasks();
+          } catch(e) { alert('Error adding task'); }
+        }
+        async function deleteTask(id) {
+          try {
+            await fetch(`${API}/${id}`, { method: 'DELETE' });
+            loadTasks();
+          } catch(e) { alert('Error deleting task'); }
+        }
+        document.getElementById('addBtn').onclick = addTask;
+        document.getElementById('todoInput').onkeypress = e => { if(e.key === 'Enter') addTask(); };
+        setInterval(loadTasks, 5000);
+        loadTasks();
+      </script>
+    </body>
+    </html>

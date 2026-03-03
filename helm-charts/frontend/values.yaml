@@ -1,0 +1,13 @@
+replicaCount: 2
+
+image:
+  repository: nginx
+  tag: "1.27.3-alpine3.20"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 80
+
+backendUrl: "http://backend:5000"

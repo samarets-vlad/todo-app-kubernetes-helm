@@ -1,0 +1,15 @@
+schedule: "0 2 * * *"
+
+image:
+  repository: mysql
+  tag: "8.0.40"
+
+mysql:
+  host: "mysql"
+  secretName: "mysql-secret"
+
+persistence:
+  size: 2Gi
+  storageClass: "local-path"
+
+retentionDays: 7

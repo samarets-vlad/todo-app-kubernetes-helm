@@ -1,0 +1,18 @@
+image:
+  repository: mysql
+  tag: "8.0.40"
+  pullPolicy: IfNotPresent
+
+auth:
+  rootPassword: "todopass123"
+  database: "tododb"
+  user: "todouser"
+  password: "todopassword"
+
+persistence:
+  size: 1Gi
+  storageClass: "local-path"
+
+service:
+  type: ClusterIP
+  port: 3306

@@ -1,0 +1,19 @@
+ingressClassName: traefik
+
+host: "todo.mydevtasktrain.pp.ua"
+
+annotations:
+  cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+  traefik.ingress.kubernetes.io/router.tls: "true"
+
+frontend:
+  serviceName: "frontend"
+  servicePort: 80
+
+backend:
+  serviceName: "backend"
+  servicePort: 5000
+
+tls:
+  secretName: "todo-app-letsencrypt-tls"
