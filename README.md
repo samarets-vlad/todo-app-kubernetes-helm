@@ -35,22 +35,27 @@ A production-ready deployment of a full-stack Todo application on a **single-nod
     ├── ingress/           # Traefik Ingress chart
     ├── backup/            # CronJob backup chart
     └── monitoring/        # Prometheus, Grafana, Loki stack
-Quick Start
-1. Install k3s
-bash
+```
+
+## Quick Start
+### 1. Install k3s
+```bash
 curl -sfL https://get.k3s.io | sh -
 mkdir -p ~/.kube
 sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
 sudo chown $USER:$USER ~/.kube/config
 echo 'export KUBECONFIG=~/.kube/config' >> ~/.bashrc && source ~/.bashrc
-2. Install Helm
-bash
+```
+### 2. Install Helm
+```bash
 curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-3. Install cert-manager
-bash
+```
+### 3. Install cert-manager
+```bash
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml
-4. Deploy the stack
-bash
+```
+### 4. Deploy the stack
+```bash
 kubectl create namespace todo-app
 
 helm install database helm-charts/database --namespace todo-app \
@@ -70,28 +75,31 @@ helm install backup helm-charts/backup --namespace todo-app
 helm install monitoring helm-charts/monitoring --namespace todo-app \
   --set grafana.adminPassword="YOUR_GRAFANA_PASSWORD" \
   --set certManager.email="your@email.com"
-5. Verify
-bash
+```
+### 5. Verify
+```bash
 kubectl get pods,svc,ingress -n todo-app
-Helm Hooks
+```
+## Helm Hooks
 On every helm install a post-install Job automatically:
 
 Waits for the backend to be ready (initContainer with retry loop)
 
 Creates initial onboarding tasks via the REST API
 
-Database Backup
+## Database Backup
 Daily CronJob (00:00 UTC) dumps MySQL to a PVC.
 
-bash
+```bash
 kubectl get cronjob -n todo-app
 kubectl get pvc -n todo-app
-Monitoring
+```
+## Monitoring
 Service	Access
 Grafana	http://YOUR_VPS_IP:NODEPORT
 Prometheus	ClusterIP (internal)
 Loki	ClusterIP (internal)
-Security
+## Security
 Secrets passed via --set, never stored in values.yaml
 
 See values.example.yaml in each chart for required fields
@@ -100,8 +108,8 @@ Backend runs as non-root (UID 1000)
 
 Database accessible only within cluster (ClusterIP)
 
-Local Development
-bash
+## Local Development
+```bash
 # Lint all charts
 helm lint helm-charts/backend helm-charts/frontend helm-charts/database
 
